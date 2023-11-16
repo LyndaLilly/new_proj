@@ -44,8 +44,7 @@ int navigate(code_proj *codep)
 	{
 		tref = bring(codep, "HOME=");
 		if (!tref)
-			refes =
-				chdir((tref = bring(codep, "PWD=")) ? tref : "/");
+			refes = chdir((tref = bring(codep, "PWD=")) ? tref : "/");
 		else
 			refes = chdir(tref);
 	}
