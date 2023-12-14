@@ -1,42 +1,48 @@
 #include "proj.h"
 
-/**
- * main - this is the main code
- * @ready: ready code
- * @half: this is the argument
- * Return: 0 or 1
- */
-int main(int ready, char **half)
-{
-	code_proj codep[] = { INFO_INIT };
-	int prt = 2;
+bus_t bus = {NULL, NULL, NULL, 0};
 
-	asm ("mov %1, %0\n\t"
-			"add $3, %0"
-			: "=r" (prt)
-			: "r" (prt));
-	if (ready == 2)
+/**
+* main - monty code interpreter
+* @argc: number of arguments
+* @argv: monty file location
+* Return: 0 on success
+*/
+int main(int argc, char *argv[])
+{
+
+	char *input;
+	FILE *paper;
+	size_t size = 0;
+	ssize_t read_line = 1;
+	stack_t *stack = NULL;
+	unsigned int cnt = 0;
+
+	if (argc != 2)
 	{
-		prt = open(half[1], O_RDONLY);
-		if (prt == -1)
-		{
-			if (errno == EACCES)
-				exit(126);
-			if (errno == ENOENT)
-			{
-				subst_vals(half[0]);
-				subst_vals(": 0: can't open ");
-				subst_vals(half[1]);
-				swap('\n');
-				swap(BUF_FLUSH);
-				exit(127);
-			}
-			return (EXIT_FAILURE);
-		}
-		codep->memo = prt;
+		fprintf(stderr, "USAGE: monty file\n");
+		exit(EXIT_FAILURE);
 	}
-	expand(codep);
-	learn_(codep);
-	foo(codep, half);
-	return (EXIT_SUCCESS);
+	paper = fopen(argv[1], "r");
+	bus.paper = paper;
+	if (!paper)
+	{
+		fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
+		exit(EXIT_FAILURE);
+	}
+	while (read_line > 0)
+	{
+		input = NULL;
+		read_line = getline(&input, &size, paper);
+		bus.input = input;
+		cnt++;
+		if (read_line > 0)
+		{
+			ops(input, &stack, cnt, paper);
+		}
+		free(paper);
+	}
+	free_mem(stack);
+	fclose(paper);
+	return (0);
 }
